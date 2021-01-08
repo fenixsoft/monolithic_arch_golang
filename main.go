@@ -9,6 +9,7 @@ import (
 	"github.com/fenixsoft/monolithic_arch_golang/domain"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 )
 
@@ -18,6 +19,8 @@ func main() {
 	// 处理启动参数传入的配置
 	var data []byte
 	var err error
+	var logger = infrasturcture.ContextLogger()
+
 	flag.Parse()
 	if *conf != "" {
 		data, err = ioutil.ReadFile(*conf)
@@ -34,8 +37,11 @@ func main() {
 	ddl, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("schema.sql")
 	dml, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("data.sql")
 	domain.InitDB(ddl, dml)
+	logger.Info("初始化数据库完毕")
 
 	// 初始化路由与HTTP服务
+	gin.DefaultWriter = logger.WriterLevel(logrus.DebugLevel)
+	gin.DefaultErrorWriter = logger.WriterLevel(logrus.ErrorLevel)
 	router := gin.Default()
 	controller.Register(router)
 	_ = router.Run(":" + infrasturcture.GetConfiguration().Port)

@@ -1,15 +1,12 @@
 package domain
 
 import (
-	"context"
 	"fmt"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"reflect"
 )
-
-const TransactionContext = "DB_CTX"
 
 type Database struct {
 	DSN     string
@@ -38,16 +35,10 @@ func InitDB(scripts ...string) *gorm.DB {
 	return db
 }
 
-// 取当前访问上下文中的数据库连接
-// 当前上下文中，由事务中间件自动开启和提交事务，无需手动管理
-func (db *Database) Context(ctx context.Context) *Database {
-	session := ctx.Value(TransactionContext).(*gorm.DB)
-	ctxDB := new(Database)
-	*ctxDB = *db
-	ctxDB.Session = session
-	return ctxDB
+func ConnTrace(st *gorm.Statement) string {
+	return fmt.Sprintf("Connection with %v@%v", reflect.TypeOf(st.ConnPool), &st.ConnPool)
 }
 
 func (db *Database) String() string {
-	return fmt.Sprintf("Conn: %v@%v", reflect.TypeOf(db.Session.Statement.ConnPool), &db.Session.Statement.ConnPool)
+	return ConnTrace(db.Session.Statement)
 }

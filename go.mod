@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
+	github.com/sirupsen/logrus v1.7.0
 	gorm.io/driver/sqlite v1.1.4
 	gorm.io/gorm v1.20.9
 )
