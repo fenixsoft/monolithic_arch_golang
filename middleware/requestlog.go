@@ -1,13 +1,12 @@
+// 日志中间件
+// 提供自动带有上下文访问路径、事务ID等支持
 package middleware
 
 import (
 	"context"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-)
-
-const (
-	LoggerContext = "LOGGER_CTX"
 )
 
 func RequestLoggerMiddleware() gin.HandlerFunc {
@@ -16,11 +15,6 @@ func RequestLoggerMiddleware() gin.HandlerFunc {
 			"url": c.Request.URL,
 		})
 		ctx := c.Request.Context()
-		c.Request = c.Request.WithContext(context.WithValue(ctx, LoggerContext, logger))
+		c.Request = c.Request.WithContext(context.WithValue(ctx, infrasturcture.CTXLogger, logger))
 	}
-}
-
-func Logger(context *gin.Context) *logrus.Entry {
-	ctx := context.Request.Context()
-	return ctx.Value(LoggerContext).(*logrus.Entry)
 }

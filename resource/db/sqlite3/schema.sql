@@ -25,8 +25,8 @@ CREATE TABLE wallets
 (
     id         INTEGER IDENTITY PRIMARY KEY,
     money      DECIMAL,
-    accounts_id INTEGER,
-    CONSTRAINT fk_wallets_accounts FOREIGN KEY (accounts_id) REFERENCES accounts (id)
+    account_id INTEGER,
+    CONSTRAINT fk_wallets_accounts FOREIGN KEY (account_id) REFERENCES accounts (id)
 );
 
 
@@ -47,8 +47,8 @@ CREATE TABLE stockpiles
     id         INTEGER IDENTITY PRIMARY KEY,
     amount     INTEGER,
     frozen     INTEGER,
-    products_id INTEGER,
-    CONSTRAINT fk_stockpiles_products FOREIGN KEY (products_id) REFERENCES products (id)
+    product_id INTEGER,
+    CONSTRAINT fk_stockpiles_products FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE specifications
@@ -56,16 +56,16 @@ CREATE TABLE specifications
     id         INTEGER IDENTITY PRIMARY KEY,
     item       VARCHAR(50),
     value      VARCHAR(100),
-    products_id INTEGER,
-    CONSTRAINT fk_specifications_products FOREIGN KEY (products_id) REFERENCES products (id)
+    product_id INTEGER,
+    CONSTRAINT fk_specifications_products FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE advertisements
 (
     id         INTEGER IDENTITY PRIMARY KEY,
     image      VARCHAR(100),
-    products_id INTEGER,
-    CONSTRAINT fk_advertisements_products FOREIGN KEY (products_id) REFERENCES products (id)
+    product_id INTEGER,
+    CONSTRAINT fk_advertisements_products FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE payments

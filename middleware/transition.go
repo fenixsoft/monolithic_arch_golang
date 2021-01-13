@@ -7,38 +7,27 @@ package middleware
 
 import (
 	"context"
-	"github.com/fenixsoft/monolithic_arch_golang/domain"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
-
-const TransactionContext = "DB_CTX"
 
 func TransitionalMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		tx := domain.DB.Session.WithContext(ctx).Begin()
-		c.Request = c.Request.WithContext(context.WithValue(ctx, TransactionContext, tx))
-		logger := Logger(c)
-		logger.Debugf("开启中间件事务：%v\n", domain.ConnTrace(tx.Statement))
+		tx := infrasturcture.DB.Session.WithContext(ctx).Begin()
+		c.Request = c.Request.WithContext(context.WithValue(ctx, infrasturcture.CTXTransaction, tx))
+		logger := infrasturcture.Logger(c)
+		logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Debug("开启中间件事务")
 		defer func() {
 			if r := recover(); r != nil {
-				logger.Debugf("回滚中间件事务：%v\n", domain.ConnTrace(tx.Statement))
+				logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Errorf("回滚中间件事务，异常原因：%v\n", r)
 				tx.Rollback()
+				// 不在事务中间件中处理恐慌，回滚后继续抛出恐慌，在后续的Recovery中间件中统一解决
+				panic(r)
 			}
 		}()
 		c.Next()
-		logger.Debugf("提交中间件事务：%v\n", domain.ConnTrace(tx.Statement))
+		logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Debug("提交中间件事务")
 		tx.Commit()
 	}
-}
-
-// Transactional 返回由事务中间件自动管理的事务的Session
-func Transactional(context *gin.Context) *domain.Database {
-	ctx := context.Request.Context()
-	session := ctx.Value(TransactionContext).(*gorm.DB)
-	ctxDB := new(domain.Database)
-	*ctxDB = domain.DB
-	ctxDB.Session = session
-	return ctxDB
 }

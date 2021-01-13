@@ -6,7 +6,6 @@ import (
 	"flag"
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/fenixsoft/monolithic_arch_golang/controller"
-	"github.com/fenixsoft/monolithic_arch_golang/domain"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -19,7 +18,7 @@ func main() {
 	// 处理启动参数传入的配置
 	var data []byte
 	var err error
-	var logger = infrasturcture.ContextLogger()
+	var logger = logrus.StandardLogger()
 
 	flag.Parse()
 	if *conf != "" {
@@ -36,13 +35,16 @@ func main() {
 	// 初始化数据库
 	ddl, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("schema.sql")
 	dml, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("data.sql")
-	domain.InitDB(ddl, dml)
+	infrasturcture.InitDB(ddl, dml)
 	logger.Info("初始化数据库完毕")
 
 	// 初始化路由与HTTP服务
 	gin.DefaultWriter = logger.WriterLevel(logrus.DebugLevel)
 	gin.DefaultErrorWriter = logger.WriterLevel(logrus.ErrorLevel)
-	router := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+	// router.Use(gin.Logger())  // 这个日志中间件太话唠了，建议不加载
+	router.Use(gin.Recovery())
 	controller.Register(router)
 	_ = router.Run(":" + infrasturcture.GetConfiguration().Port)
 }
