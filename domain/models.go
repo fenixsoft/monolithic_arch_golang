@@ -4,7 +4,7 @@ package domain
 import "time"
 
 type BaseModel struct {
-	ID uint `json:"id" gorm:"primaryKey"`
+	ID uint `json:"id" gorm:"primaryKey;autoIncrement;notNull"`
 }
 
 // 广告实体
@@ -36,9 +36,10 @@ type Specification struct {
 
 // 用户
 type Account struct {
-	BaseModel
+	// BaseModel
+	ID        uint   `json:"id" gorm:"primaryKey;autoIncrement;notNull"`
 	Username  string `json:"username" binding:"required"`
-	Password  string `json:"password" binding:"required"`
+	Password  string `json:"password,omitempty" binding:"required"`
 	Avatar    string `json:"avatar"`
 	Telephone string `json:"telephone" binding:"required,numeric,startswith=1,len=11"`
 	Email     string `json:"email" binding:"required,email"`
@@ -59,14 +60,14 @@ type Payment struct {
 // 商品库存
 type Stockpile struct {
 	BaseModel
-	Amount  uint32  `json:"amount"`
-	Frozen  uint32  `json:"frozen"`
-	Product Product `json:"product"`
+	Amount    uint32 `json:"amount"`
+	Frozen    uint32 `json:"frozen"`
+	ProductId uint   `json:"productId"`
 }
 
 // 用户钱包
 type Wallet struct {
 	BaseModel
-	Money   float64 `json:"money"`
-	Account Account `json:"account"`
+	Money     float64 `json:"money"`
+	AccountId uint    `json:"accountId"`
 }

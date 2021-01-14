@@ -1,3 +1,4 @@
 database: sqlite3
-dsn: file::memory:?mode=memory&cache=shared&loc=Asia/Shanghai
+#dsn: file::memory:?mode=memory&cache=shared&loc=Asia/Shanghai
+dsn: gorm.db?mode=memory&cache=shared&loc=Asia/Shanghai
 port: 8081

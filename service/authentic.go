@@ -26,8 +26,8 @@ type JWT struct {
 
 // 判断用户名、密码是否对应一个有效的用户
 func (service *Service) CheckUserAccount(username, password string) (*domain.Account, error) {
-	account, num := domain.GetAccountByName(service.DB(), username)
-	if num == 0 {
+	account, err := domain.GetAccountByName(service.DB(), username)
+	if err != nil {
 		return nil, errors.New("用户不存在")
 	} else if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password)); err != nil {
 		return nil, errors.New("密码不正确")

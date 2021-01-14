@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
+	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
 	"github.com/fenixsoft/monolithic_arch_golang/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,7 +20,7 @@ func SecurityMiddleware() gin.HandlerFunc {
 			}
 			// 验证令牌有效，从令牌中取出username（其他像Scope这些，在Golang版本中就不使用了）
 			ctx := gc.Request.Context()
-			gc.Request = gc.Request.WithContext(context.WithValue(ctx, infrasturcture.CTXUsername, claims["username"]))
+			gc.Request = gc.Request.WithContext(context.WithValue(ctx, ctx2.CTXUsername, claims["username"]))
 		}
 	}
 }

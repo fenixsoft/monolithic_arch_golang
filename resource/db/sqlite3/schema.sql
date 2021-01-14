@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS payments;
 
 CREATE TABLE accounts
 (
-    id        INTEGER IDENTITY PRIMARY KEY,
+    id        INTEGER PRIMARY KEY NOT NULL,
     username  VARCHAR(50),
     password  VARCHAR(100),
     name      VARCHAR(50),
@@ -23,7 +23,7 @@ CREATE UNIQUE INDEX accounts_email ON accounts (email);
 
 CREATE TABLE wallets
 (
-    id         INTEGER IDENTITY PRIMARY KEY,
+    id         INTEGER PRIMARY KEY,
     money      DECIMAL,
     account_id INTEGER,
     CONSTRAINT fk_wallets_accounts FOREIGN KEY (account_id) REFERENCES accounts (id)
@@ -32,7 +32,7 @@ CREATE TABLE wallets
 
 CREATE TABLE products
 (
-    id          INTEGER IDENTITY PRIMARY KEY,
+    id          INTEGER PRIMARY KEY,
     title       VARCHAR(50),
     price       DECIMAL,
     rate        FLOAT,
@@ -44,7 +44,7 @@ CREATE INDEX products_title ON products (title);
 
 CREATE TABLE stockpiles
 (
-    id         INTEGER IDENTITY PRIMARY KEY,
+    id         INTEGER PRIMARY KEY,
     amount     INTEGER,
     frozen     INTEGER,
     product_id INTEGER,
@@ -53,7 +53,7 @@ CREATE TABLE stockpiles
 
 CREATE TABLE specifications
 (
-    id         INTEGER IDENTITY PRIMARY KEY,
+    id         INTEGER PRIMARY KEY,
     item       VARCHAR(50),
     value      VARCHAR(100),
     product_id INTEGER,
@@ -62,7 +62,7 @@ CREATE TABLE specifications
 
 CREATE TABLE advertisements
 (
-    id         INTEGER IDENTITY PRIMARY KEY,
+    id         INTEGER PRIMARY KEY,
     image      VARCHAR(100),
     product_id INTEGER,
     CONSTRAINT fk_advertisements_products FOREIGN KEY (product_id) REFERENCES products (id)
@@ -70,7 +70,7 @@ CREATE TABLE advertisements
 
 CREATE TABLE payments
 (
-    id           INTEGER IDENTITY PRIMARY KEY,
+    id           INTEGER PRIMARY KEY,
     pay_id       VARCHAR(100),
     create_time  DATETIME,
     total_price  DECIMAL,

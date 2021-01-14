@@ -1,12 +1,16 @@
-package infrasturcture
+package db
 
 import (
 	"context"
 	"fmt"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/config"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/logger"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"reflect"
 )
+
+const CTXTransaction = "CTX_DB_Transaction"
 
 type Database struct {
 	DSN     string
@@ -14,14 +18,19 @@ type Database struct {
 	Config  *gorm.Config
 }
 
+type Result struct {
+	Error        error
+	RowsAffected int64
+}
+
 var DB Database
 
 // 初始化数据库
 // 建立数据库连接、ORM，并执行外部传入的脚本进行
 func InitDB(scripts ...string) *gorm.DB {
-	DB.DSN = GetConfiguration().DSN
+	DB.DSN = config.GetConfiguration().DSN
 	DB.Config = &gorm.Config{
-		Logger: GORMLogger(),
+		Logger: logger.GORMLogger(),
 	}
 	db, err := gorm.Open(sqlite.Open(DB.DSN), DB.Config)
 	if err != nil {

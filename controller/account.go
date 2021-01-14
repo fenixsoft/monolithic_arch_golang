@@ -1,8 +1,9 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/fenixsoft/monolithic_arch_golang/domain"
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/response"
 	"github.com/fenixsoft/monolithic_arch_golang/service"
 	"github.com/fenixsoft/monolithic_arch_golang/service/validation"
 	"github.com/gin-gonic/gin"
@@ -15,8 +16,8 @@ func (c *AccountController) Register(router gin.IRouter) {
 	// 获取用户信息
 	router.GET("/accounts/:username", func(context *gin.Context) {
 		username := context.Param("username")
-		account, num := domain.GetAccountByName(DB(context), username)
-		if num == 0 {
+		account, err := domain.GetAccountByName(DB(context), username)
+		if err != nil {
 			context.String(http.StatusNotFound, "未能找到指定用户")
 		} else {
 			context.JSON(http.StatusOK, account)
@@ -27,8 +28,8 @@ func (c *AccountController) Register(router gin.IRouter) {
 	router.PUT("/accounts", func(context *gin.Context) {
 		if account, err := bindAccount(context); err == nil {
 			if validation.RunAccountValidation(context, account, []validation.TypeAccount{validation.Authenticated, validation.NotConflict}) {
-				infrasturcture.Op(context, func() {
-					domain.UpdateAccount(DB(context), account)
+				response.Op(context, func() {
+					try(domain.UpdateAccount(DB(context), account))
 				})
 			}
 		}
@@ -38,9 +39,10 @@ func (c *AccountController) Register(router gin.IRouter) {
 	router.POST("/accounts", func(context *gin.Context) {
 		if account, err := bindAccount(context); err == nil {
 			if validation.RunAccountValidation(context, account, []validation.TypeAccount{validation.Unique}) {
-				infrasturcture.Op(context, func() {
+				response.Op(context, func() {
 					account.Password = service.PasswordEncoding(account.Password)
-					domain.CreateAccount(DB(context), account)
+					try(domain.CreateAccount(DB(context), account))
+					fmt.Printf("id:%v\n", account.ID)
 				})
 			}
 		}
@@ -48,10 +50,6 @@ func (c *AccountController) Register(router gin.IRouter) {
 }
 
 func bindAccount(context *gin.Context) (*domain.Account, error) {
-	var account domain.Account
-	if err := context.ShouldBindJSON(&account); err != nil {
-		infrasturcture.ClientError(context, err.Error())
-		return nil, err
-	}
-	return &account, nil
+	acc, err := bindModel(context, new(domain.Account))
+	return acc.(*domain.Account), err
 }

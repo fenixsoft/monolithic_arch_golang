@@ -6,7 +6,8 @@ import (
 	"flag"
 	rice "github.com/GeertJohan/go.rice"
 	"github.com/fenixsoft/monolithic_arch_golang/controller"
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/config"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -28,14 +29,14 @@ func main() {
 	}
 	if err != nil {
 		panic("读取配置文件失败：" + err.Error())
-	} else if err = infrasturcture.LoadConfiguration(data); err != nil {
+	} else if err = config.LoadConfiguration(data); err != nil {
 		panic("解析配置文件失败：" + err.Error())
 	}
 
 	// 初始化数据库
-	ddl, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("schema.sql")
-	dml, _ := rice.MustFindBox("resource/db/" + infrasturcture.GetConfiguration().Database).String("data.sql")
-	infrasturcture.InitDB(ddl, dml)
+	ddl, _ := rice.MustFindBox("resource/db/" + config.GetConfiguration().Database).String("schema.sql")
+	dml, _ := rice.MustFindBox("resource/db/" + config.GetConfiguration().Database).String("data.sql")
+	db.InitDB(ddl, dml)
 	logger.Info("初始化数据库完毕")
 
 	// 初始化路由与HTTP服务
@@ -46,5 +47,5 @@ func main() {
 	// router.Use(gin.Logger())  // 这个日志中间件太话唠了，建议不加载
 	router.Use(gin.Recovery())
 	controller.Register(router)
-	_ = router.Run(":" + infrasturcture.GetConfiguration().Port)
+	_ = router.Run(":" + config.GetConfiguration().Port)
 }

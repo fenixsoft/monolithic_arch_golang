@@ -1,4 +1,4 @@
-package infrasturcture
+package logger
 
 import (
 	"context"

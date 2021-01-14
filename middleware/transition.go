@@ -7,27 +7,28 @@ package middleware
 
 import (
 	"context"
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
+	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
 	"github.com/gin-gonic/gin"
 )
 
 func TransitionalMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		tx := infrasturcture.DB.Session.WithContext(ctx).Begin()
-		c.Request = c.Request.WithContext(context.WithValue(ctx, infrasturcture.CTXTransaction, tx))
-		logger := infrasturcture.Logger(c)
-		logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Debug("开启中间件事务")
+		tx := db.DB.Session.WithContext(ctx).Begin()
+		c.Request = c.Request.WithContext(context.WithValue(ctx, db.CTXTransaction, tx))
+		logger := ctx2.Logger(c)
+		logger.WithField("Tx", db.TxID(tx.Statement)).Trace("开启中间件事务")
 		defer func() {
 			if r := recover(); r != nil {
-				logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Errorf("回滚中间件事务，异常原因：%v\n", r)
+				logger.WithField("Tx", db.TxID(tx.Statement)).Errorf("回滚中间件事务，异常原因：%v\n", r)
 				tx.Rollback()
 				// 不在事务中间件中处理恐慌，回滚后继续抛出恐慌，在后续的Recovery中间件中统一解决
 				panic(r)
 			}
 		}()
 		c.Next()
-		logger.WithField("Tx", infrasturcture.TxID(tx.Statement)).Debug("提交中间件事务")
+		logger.WithField("Tx", db.TxID(tx.Statement)).Trace("提交中间件事务")
 		tx.Commit()
 	}
 }

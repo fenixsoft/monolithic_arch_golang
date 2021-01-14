@@ -4,7 +4,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture"
+	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -15,6 +15,6 @@ func RequestLoggerMiddleware() gin.HandlerFunc {
 			"url": c.Request.URL,
 		})
 		ctx := c.Request.Context()
-		c.Request = c.Request.WithContext(context.WithValue(ctx, infrasturcture.CTXLogger, logger))
+		c.Request = c.Request.WithContext(context.WithValue(ctx, ctx2.CTXLogger, logger))
 	}
 }

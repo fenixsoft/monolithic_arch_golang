@@ -1,4 +1,4 @@
-package infrasturcture
+package config
 
 import (
 	"github.com/go-yaml/yaml"

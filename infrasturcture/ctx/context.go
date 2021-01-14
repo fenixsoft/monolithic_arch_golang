@@ -1,19 +1,19 @@
-package infrasturcture
+package ctx
 
 import (
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	CTXTransaction = "CTX_DB_Transaction"
-	CTXUsername    = "CTX_User"
-	CTXLogger      = "CTX_Logger"
+	CTXUsername = "CTX_User"
+	CTXLogger   = "CTX_Logger"
 )
 
 // Transaction 返回由事务中间件自动管理的事务的Session
-func Transaction(context *gin.Context) *Database {
-	return TxDB(context.Request.Context())
+func Transaction(context *gin.Context) *db.Database {
+	return db.TxDB(context.Request.Context())
 }
 
 // Logger 返回当前上下文中的日志对象
