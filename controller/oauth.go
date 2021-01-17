@@ -3,7 +3,7 @@ package controller
 
 import (
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/response"
-	"github.com/fenixsoft/monolithic_arch_golang/service"
+	"github.com/fenixsoft/monolithic_arch_golang/service/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,11 +15,10 @@ func (c *OAuth2Controller) Register(router gin.IRouter) {
 		// 验证用户身份
 		username := context.Query("username")
 		password := context.Query("password")
-		s := service.Service{Context: context.Request.Context()}
-		if account, err := s.CheckUserAccount(username, password); err != nil {
+		if account, err := auth.CheckUserAccount(context.Request.Context(), username, password); err != nil {
 			response.ClientError(context, "用户名或密码不正确")
 		} else {
-			context.JSON(http.StatusOK, s.BuildJWTAccessToken(account))
+			context.JSON(http.StatusOK, auth.BuildJWTAccessToken(account))
 		}
 	})
 }

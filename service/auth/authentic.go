@@ -1,11 +1,13 @@
 // 用户认证相关服务
-package service
+package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/fenixsoft/monolithic_arch_golang/domain"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
@@ -25,18 +27,18 @@ type JWT struct {
 }
 
 // 判断用户名、密码是否对应一个有效的用户
-func (service *Service) CheckUserAccount(username, password string) (*domain.Account, error) {
-	account, err := domain.GetAccountByName(service.DB(), username)
+func CheckUserAccount(context context.Context, username, password string) (*domain.Account, error) {
+	account, err := domain.NewAccount(db.NewDB()).GetByName(username)
 	if err != nil {
 		return nil, errors.New("用户不存在")
 	} else if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password)); err != nil {
 		return nil, errors.New("密码不正确")
 	}
-	return &account, nil
+	return account, nil
 }
 
 // 根据指定用户信息输出JWT令牌
-func (service Service) BuildJWTAccessToken(account *domain.Account) *JWT {
+func BuildJWTAccessToken(account *domain.Account) *JWT {
 	tokenId := uuid.New()
 	refreshTokenId := uuid.New()
 	r := &JWT{

@@ -1,12 +1,18 @@
 package response
 
 import (
+	"errors"
 	"fmt"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/state"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func Error(context *gin.Context, code int, err string) {
+	d := state.WithGinContext(context).Database()
+	d.Error = errors.New(err)
+	d.State = db.TransactionStateRollback
 	context.AbortWithStatusJSON(code, gin.H{"code": 1, "message": err})
 }
 
@@ -26,18 +32,11 @@ func Success(context *gin.Context) {
 func Op(context *gin.Context, fn func()) {
 	defer func() {
 		if r := recover(); r != nil {
+			state.WithGinContext(context).Logger().Errorf("%v\n", r)
 			ServerError(context, fmt.Sprintf("%v\n", r))
 		}
 	}()
 	fn()
+	state.WithGinContext(context).Database().State = db.TransactionStateCommit
 	Success(context)
-}
-
-// 搏一搏，行就行，不行就崩
-// 用于偷懒，减少if err!=nil的数量
-func Try(ret interface{}, err error) interface{} {
-	if err != nil {
-		panic(err)
-	}
-	return ret
 }

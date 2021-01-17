@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/config"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/logger"
@@ -10,12 +9,23 @@ import (
 	"reflect"
 )
 
-const CTXTransaction = "CTX_DB_Transaction"
+const CTXDatabase = "CTX_DB"
+
+type TransactionState string
+
+const (
+	TransactionStateGlobal     = "Non-Transaction" // 全局连接，未开启事务
+	TransactionStateProcessing = "Processing"      // 已开启事务，正在处理中
+	TransactionStateCommit     = "Commit"          // 事务已提交
+	TransactionStateRollback   = "Rollback"        // 事务已回滚
+)
 
 type Database struct {
 	DSN     string
 	Session *gorm.DB
 	Config  *gorm.Config
+	State   TransactionState
+	Error   error
 }
 
 type Result struct {
@@ -30,8 +40,10 @@ var DB Database
 func InitDB(scripts ...string) *gorm.DB {
 	DB.DSN = config.GetConfiguration().DSN
 	DB.Config = &gorm.Config{
-		Logger: logger.GORMLogger(),
+		Logger:                 logger.GORMLogger(),
+		SkipDefaultTransaction: true,
 	}
+	DB.State = TransactionStateGlobal
 	db, err := gorm.Open(sqlite.Open(DB.DSN), DB.Config)
 	if err != nil {
 		panic("连接数据库失败：" + err.Error())
@@ -46,14 +58,18 @@ func InitDB(scripts ...string) *gorm.DB {
 	return db
 }
 
-func TxDB(ctx context.Context) *Database {
-	ctxDB := new(Database)
-	*ctxDB = DB
-	// 如果上下文中有数据库会话，就使用上下文的，否则就使用全局的
-	if session, ok := ctx.Value(CTXTransaction).(*gorm.DB); ok {
-		ctxDB.Session = session
-	}
-	return ctxDB
+func NewDB() *Database {
+	newDB := new(Database)
+	*newDB = DB
+	return newDB
+}
+
+func NewWithTx(tx *gorm.DB) *Database {
+	txDB := new(Database)
+	*txDB = DB
+	txDB.Session = tx
+	txDB.State = TransactionStateProcessing
+	return txDB
 }
 
 func TxID(st *gorm.Statement) string {

@@ -4,7 +4,7 @@ package middleware
 
 import (
 	"context"
-	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
+	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/state"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

@@ -10,6 +10,6 @@ type AdvertisementController struct{}
 
 func (c *AdvertisementController) Register(router gin.IRouter) {
 	router.GET("/advertisements", func(context *gin.Context) {
-		context.JSON(http.StatusOK, try(domain.FindAllAdvertisements(DB(context))))
+		context.JSON(http.StatusOK, try(domain.NewAdvertisement(DB(context)).FindAll()))
 	})
 }

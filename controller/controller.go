@@ -2,8 +2,10 @@
 package controller
 
 import (
-	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/response"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/state"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/util"
 	"github.com/fenixsoft/monolithic_arch_golang/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +18,8 @@ var (
 		new(AdvertisementController),
 		new(ProductController),
 		new(AccountController),
+		new(SettlementController),
+		new(PaymentController),
 	}
 )
 
@@ -49,6 +53,10 @@ func bindModel(context *gin.Context, model interface{}) (interface{}, error) {
 
 // 起个别名
 var (
-	DB  = ctx.Transaction
-	try = response.Try
+	// DB  = state.Database
+	try = util.Try
 )
+
+func DB(context *gin.Context) *db.Database {
+	return state.WithGinContext(context).Database()
+}

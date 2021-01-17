@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/ctx"
-	"github.com/fenixsoft/monolithic_arch_golang/service"
+	ctx2 "github.com/fenixsoft/monolithic_arch_golang/infrasturcture/state"
+	auth2 "github.com/fenixsoft/monolithic_arch_golang/service/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -14,7 +14,7 @@ func SecurityMiddleware() gin.HandlerFunc {
 		auth := gc.Request.Header.Get("Authorization")
 		// 判断是否以“bearer ”开头，部分服务是允许没有令牌访问的，只是拿不到上下文中的username了
 		if strings.HasPrefix(auth, "bearer ") {
-			claims, err := service.ValidatingJWTAccessToken(auth)
+			claims, err := auth2.ValidatingJWTAccessToken(auth)
 			if err != nil {
 				_ = gc.AbortWithError(http.StatusUnauthorized, err)
 			}
