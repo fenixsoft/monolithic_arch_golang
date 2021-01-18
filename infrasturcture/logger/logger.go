@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"errors"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/config"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
@@ -11,18 +12,17 @@ import (
 	"time"
 )
 
-func init() {
-	// TODO 改为从配置文件中获取
+func InitConfiguration(conf *config.Configuration) {
 	log.SetFormatter(&log.TextFormatter{
 		ForceColors:            true,
 		FullTimestamp:          true,
 		DisableLevelTruncation: false,
 		DisableQuote:           true,
 		PadLevelText:           true,
-		TimestampFormat:        "2006-01-02 15:04:05",
+		TimestampFormat:        conf.Logger.TimestampFormat,
 	})
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(conf.LoggerLevel())
 	log.SetReportCaller(false)
 }
 

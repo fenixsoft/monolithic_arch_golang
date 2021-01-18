@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const defaultFrozenExpires = 1 * 6 * 1000
+const defaultFrozenExpires = 2 * 60 * 1000
 
 var (
 	cache = make(map[string]*domain.Settlement)

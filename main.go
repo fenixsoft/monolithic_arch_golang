@@ -8,6 +8,8 @@ import (
 	"github.com/fenixsoft/monolithic_arch_golang/controller"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/config"
 	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/db"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/logger"
+	"github.com/fenixsoft/monolithic_arch_golang/infrasturcture/util"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -17,9 +19,11 @@ var conf = flag.String("c", "", "Fenix's Bookstore的配置文件，格式同Jav
 
 func main() {
 	// 处理启动参数传入的配置
-	var data []byte
-	var err error
-	var logger = logrus.StandardLogger()
+	var (
+		data []byte
+		err  error
+	)
+	try := util.Try
 
 	flag.Parse()
 	if *conf != "" {
@@ -32,20 +36,23 @@ func main() {
 	} else if err = config.LoadConfiguration(data); err != nil {
 		panic("解析配置文件失败：" + err.Error())
 	}
+	logger.InitConfiguration(config.GetConfiguration())
+	log := logrus.StandardLogger()
+
+	log.Info(try(rice.MustFindBox("resource").String("banner.txt")))
 
 	// 初始化数据库
 	ddl, _ := rice.MustFindBox("resource/db/" + config.GetConfiguration().Database).String("schema.sql")
 	dml, _ := rice.MustFindBox("resource/db/" + config.GetConfiguration().Database).String("data.sql")
 	db.InitDB(ddl, dml)
-	logger.Info("初始化数据库完毕")
+	log.Info("初始化数据库完毕")
 
 	// 初始化路由与HTTP服务
-	gin.DefaultWriter = logger.WriterLevel(logrus.DebugLevel)
-	gin.DefaultErrorWriter = logger.WriterLevel(logrus.ErrorLevel)
+	gin.DefaultWriter = log.WriterLevel(logrus.TraceLevel)
+	gin.DefaultErrorWriter = log.WriterLevel(logrus.ErrorLevel)
 	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	// router.Use(gin.Logger())  // 这个日志中间件太话唠了，建议不加载
-	router.Use(gin.Recovery())
+	router := gin.Default()
 	controller.Register(router)
-	_ = router.Run(":" + config.GetConfiguration().Port)
+	log.Infof("初始化Web服务完毕，端口：%v\n", config.GetConfiguration().Port)
+	try(router.Run(":" + config.GetConfiguration().Port))
 }
