@@ -20,7 +20,7 @@ go build
 ## 依赖信息
 
 - [github.com/gin-gonic/gin](https://github.com/gin-gonic/gin) v1.6.3
-  著名的Go语言Web框架，使用体检类似于[SparkJava](https://sparkjava.com/)。
+  著名的Go语言Web框架，使用体验类似于[SparkJava](https://sparkjava.com/)。
 - [gorm.io/gorm](https://gorm.io/gorm) v1.20.9
   著名的Go语言ORM框架。
 - [github.com/mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) v1.14.6 // indirect
